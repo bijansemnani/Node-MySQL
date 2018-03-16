@@ -92,6 +92,7 @@ function recurPrompt(){
       if(answer.choice === "View Products for Sale"){
         query = "SELECT * FROM products";
         read(query, null, function (data) {
+
           for (var i = 1; i < data.length; i++) {
             console.log("Item: " + data[i].product_name
                     + ", Department: " + data[i].department_name
@@ -99,23 +100,27 @@ function recurPrompt(){
                     + ", Quantity: " + data[i].stock_quantity);
             console.log("----------------------------------------------------------------------");
           }
+
         });
       }
 
       if(answer.choice === "View Low Inventory"){
         query = "SELECT * FROM products WHERE stock_quantity < 5";
         read(query, null, function (data) {
+
           if(data.length > 0){
             console.log(data);
           } else {
             console.log("There are no items that are low");
           }
+
         });
       }
 
       if(answer.choice === "Add to Inventory"){
         var id = 0;
         var product;
+
         for (var i = 0; i < data.length; i++) {
           if (answer.item === data[i].product_name) {
             id = data[i].item_id;
@@ -123,11 +128,14 @@ function recurPrompt(){
             console.log(product.stock_quantity);
           }
         }
+        
         product.stock_quantity += parseInt(answer.quantity);
         query = "UPDATE products SET ? WHERE ?";
+
         var cleaning = [{stock_quantity:product.stock_quantity},
                         {item_id:id}
         ];
+
         read(query, cleaning, function (data) {
           console.log("Updated!!!");
         });
@@ -136,6 +144,7 @@ function recurPrompt(){
       if (answer.choice === "Add New Product") {
         console.log(answer);
         query = "INSERT INTO products SET ?";
+
         var cleaning =
         {
           product_name: answer.newProduct,
@@ -143,6 +152,7 @@ function recurPrompt(){
           price: answer.newPrice,
           stock_quantity: answer.newQuantity
         };
+
         read(query, cleaning, function (data) {
           console.log("Inserted!!!");
         });
