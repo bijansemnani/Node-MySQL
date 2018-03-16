@@ -25,36 +25,80 @@ function read(query, clean, funky) {
 }
 
 function recurPrompt(){
-  inquire.prompt([
-    {
-      type:"list",
-      name:"choice",
-      message:"What would you like to do?",
-      choices:["View Products for Sale",
-               "View Low Inventory",
-               "Add to Inventory",
-               "Add New Product"
-              ]
+  read(queryAll, null, function (data) {
+    var stringArray = [];
+    for (var i = 0; i < data.length; i++){
+      stringArray.push(data[i].product_name);
     }
-  ]).then(function (answer) {
-    console.log(answer);
-    var query;
-    switch (answer.choice) {
-      case "View Products for Sale":
-        query = "SELECT * FROM products";
-        read(query, null, function (data) {
-          for (var i = 1; i < data.length; i++) {
-            console.log("Item: " + data[i].product_name
-                    + ", Department: " + data[i].department_name
-                    + ", Price: $" + data[i].price
-                    + ", Quantity: " + data[i].stock_quantity);
-            console.log("----------------------------------------------------------------------");        
+    inquire.prompt([
+      {
+        type:"list",
+        name:"choice",
+        message:"What would you like to do?",
+        choices:["View Products for Sale",
+                 "View Low Inventory",
+                 "Add to Inventory",
+                 "Add New Product"
+                ]
+      },
+      {
+        type:"list",
+        name:"item",
+        message:"What item would you like to add?",
+        choices: stringArray,
+        when: function (answer) {
+          return answer.choice === "Add to Inventory"
+        }
+      },
+      {
+        name:"quantity",
+        message:"How much?",
+        when: function (answer) {
+          return answer.choice === "Add to Inventory"
+        }
+      }
+    ]).then(function (answer) {
+      console.log(answer);
+      var query;
+      switch (answer.choice) {
+        case "View Products for Sale":
+          query = "SELECT * FROM products";
+          read(query, null, function (data) {
+            for (var i = 1; i < data.length; i++) {
+              console.log("Item: " + data[i].product_name
+                      + ", Department: " + data[i].department_name
+                      + ", Price: $" + data[i].price
+                      + ", Quantity: " + data[i].stock_quantity);
+              console.log("----------------------------------------------------------------------");
+            }
+          });
+          break;
+        case "View Low Inventory":
+          query = "SELECT * FROM products WHERE stock_quantity < 5";
+          read(query, null, function (data) {
+            console.log(data);
+          });
+        case "Add to Inventory":
+          var id = 0;
+          var product;
+          for (var i = 0; i < data.length; i++) {
+            if (answer.item === data[i].product_name) {
+              id = data[i].item_id;
+              product = data[i];
+              console.log(product.stock_quantity);
+            }
           }
-        });
-        break;
-      default:
+          product.stock_quantity += parseInt(answer.quantity);
+          query = "UPDATE products SET ? WHERE ?";
+          var cleaning = [{stock_quantity:product.stock_quantity},
+                          {item_id:id}];
+          read(query, cleaning, function (data) {
+            console.log("Updated!!!");
+          });
+        default:
 
-    }
+      }
+    });
   });
 }
 
