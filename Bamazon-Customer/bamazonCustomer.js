@@ -24,6 +24,23 @@ function read(query, clean, funky) {
   })
 }
 
+function continuePrompt() {
+  inquire.prompt([
+    {
+      type:"confirm",
+      name:"continue",
+      message:"Would you like to purchase something else?"
+    }
+  ]).then( function (answer) {
+    if(answer.continue === true){
+      recurPrompt();
+    } else {
+      console.log("Thank you come again!!!!");
+      connection.end();
+    }
+  });
+}
+
 function recurPrompt() {
   read(queryAll, null, function (data) {
     var stringArray = [];
@@ -62,9 +79,11 @@ function recurPrompt() {
           console.log("Updated!");
           var total = product.price * answer.quantity;
           console.log("Your total is: " + total);
+          continuePrompt();
         });
       } else {
         console.log("Not enough product");
+        continuePrompt();
       }
     });
   });
