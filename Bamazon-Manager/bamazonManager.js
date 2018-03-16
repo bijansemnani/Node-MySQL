@@ -56,10 +56,39 @@ function recurPrompt(){
         when: function (answer) {
           return answer.choice === "Add to Inventory"
         }
+      },
+      {
+        name:"newProduct",
+        message:"What would you like to add?",
+        when: function (answer) {
+          return answer.choice === "Add New Product"
+        }
+      },
+      {
+        name:"newDepart",
+        message:"Which department?",
+        when: function (answer) {
+          return answer.choice === "Add New Product"
+        }
+      },
+      {
+        name:"newPrice",
+        message:"How much?",
+        when: function (answer) {
+          return answer.choice === "Add New Product"
+        }
+      },
+      {
+        name:"newQuantity",
+        message:"How many?",
+        when: function (answer) {
+          return answer.choice === "Add New Product"
+        }
       }
     ]).then(function (answer) {
       console.log(answer);
       var query;
+
       if(answer.choice === "View Products for Sale"){
         query = "SELECT * FROM products";
         read(query, null, function (data) {
@@ -72,6 +101,7 @@ function recurPrompt(){
           }
         });
       }
+
       if(answer.choice === "View Low Inventory"){
         query = "SELECT * FROM products WHERE stock_quantity < 5";
         read(query, null, function (data) {
@@ -82,6 +112,7 @@ function recurPrompt(){
           }
         });
       }
+
       if(answer.choice === "Add to Inventory"){
         var id = 0;
         var product;
@@ -99,6 +130,21 @@ function recurPrompt(){
         ];
         read(query, cleaning, function (data) {
           console.log("Updated!!!");
+        });
+      }
+
+      if (answer.choice === "Add New Product") {
+        console.log(answer);
+        query = "INSERT INTO products SET ?";
+        var cleaning =
+        {
+          product_name: answer.newProduct,
+          department_name: answer.newDepart,
+          price: answer.newPrice,
+          stock_quantity: answer.newQuantity
+        };
+        read(query, cleaning, function (data) {
+          console.log("Inserted!!!");
         });
       }
     });
